@@ -4,7 +4,6 @@ import os, dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'mnu-dev-secret-key-change-in-production-2025')
 DEBUG = False
-ALLOWED_HOSTS = ["mnusaas-production.up.railway.app"]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -76,3 +75,4 @@ if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+
