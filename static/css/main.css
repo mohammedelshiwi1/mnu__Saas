@@ -1,0 +1,141 @@
+/* ===== MNU SaaS - Design System ===== */
+:root {
+  --navy:      #1B2A5E;
+  --navy-dark: #0f1c3f;
+  --navy-mid:  #243570;
+  --gold:      #C9A84C;
+  --gold-lt:   #d4b76e;
+  --navy-pale: rgba(27,42,94,.07);
+  --gold-pale: rgba(201,168,76,.12);
+  --danger:    #ef4444;
+  --success:   #10b981;
+  --info:      #3b82f6;
+  --warning:   #f59e0b;
+  --text-main: #1a1a2e;
+  --text-muted:#6b7280;
+  --border:    rgba(27,42,94,.1);
+  --shadow-sm: 0 2px 8px rgba(27,42,94,.08);
+  --shadow-md: 0 6px 24px rgba(27,42,94,.12);
+  --shadow-lg: 0 12px 40px rgba(27,42,94,.16);
+  --radius:    14px;
+  --radius-sm: 10px;
+  --radius-lg: 20px;
+}
+
+*{box-sizing:border-box}
+body{font-family:'Cairo','Segoe UI',sans-serif;background:#eef1f8;color:var(--text-main);direction:rtl;font-size:.92rem}
+
+/* ── NAVBAR ── */
+.mnu-navbar{
+  background:linear-gradient(135deg,var(--navy-dark) 0%,var(--navy) 100%)!important;
+  border-bottom:3px solid var(--gold);
+  box-shadow:0 4px 20px rgba(0,0,0,.25);
+  padding:.55rem 0;
+}
+.nav-logo{width:40px;height:40px;border-radius:50%;border:2px solid var(--gold);object-fit:cover}
+.nav-pill{color:rgba(255,255,255,.78)!important;font-weight:500;font-size:.85rem;padding:.42rem .85rem!important;border-radius:8px!important;transition:all .2s}
+.nav-pill:hover,.nav-pill.active{color:#fff!important;background:rgba(255,255,255,.14)!important}
+.nav-user-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:.35rem .7rem;cursor:pointer;transition:all .2s}
+.nav-user-btn:hover{background:rgba(255,255,255,.18)}
+.user-ava{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-lt));color:#fff;font-size:.88rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* ── LAYOUT ── */
+.main-wrap{padding:1.25rem 0;min-height:calc(100vh - 65px)}
+.page-header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:1.5rem}
+.page-title{font-size:1.25rem;font-weight:800;color:var(--navy);margin:0}
+.page-title i{color:var(--gold);margin-left:.4rem}
+
+/* ── CARDS ── */
+.card{border-radius:var(--radius)!important;border:0!important;box-shadow:var(--shadow-sm)}
+.card-header-navy{background:linear-gradient(135deg,var(--navy),var(--navy-mid))!important;border:0}
+
+/* ── KPI CARDS ── */
+.kpi-card{border-radius:var(--radius)!important;border:0!important;box-shadow:var(--shadow-sm);transition:all .3s;cursor:pointer}
+.kpi-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg)}
+.kpi-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;margin:0 auto 6px}
+.kpi-val{font-size:2rem;font-weight:800;line-height:1.1}
+.kpi-label{font-size:.72rem;color:var(--text-muted);font-weight:500;margin-top:2px}
+.kpi-sub{font-size:.63rem;opacity:.7;margin-top:1px}
+
+/* ── STAT CARDS (admin) ── */
+.stat-card{border-radius:var(--radius)!important;border:0!important;overflow:hidden;transition:all .3s}
+.stat-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+
+/* ── TABLES ── */
+.mnu-table{font-size:.875rem}
+.mnu-table thead th{background:rgba(27,42,94,.05);color:var(--navy);font-weight:700;font-size:.78rem;padding:.8rem 1rem;border-bottom:2px solid var(--border);white-space:nowrap;text-align:right}
+.mnu-table tbody td{padding:.8rem 1rem;vertical-align:middle;text-align:right;border-bottom:1px solid rgba(27,42,94,.04)}
+.mnu-table tbody tr:hover{background:rgba(27,42,94,.025)}
+.mnu-table tbody tr:last-child td{border-bottom:0}
+.tr-danger td{background:rgba(239,68,68,.04)!important}
+.tr-danger:hover td{background:rgba(239,68,68,.08)!important}
+
+/* ── BADGES ── */
+.badge-excellent{background:#dcfce7;color:#166534}
+.badge-stable{background:#dbeafe;color:#1e40af}
+.badge-danger{background:#fee2e2;color:#991b1b}
+.badge-unknown{background:#f3f4f6;color:#6b7280}
+.badge-pending{background:#fffbeb;color:#92400e}
+.badge-progress{background:#eff6ff;color:#1e40af}
+.badge-escalated{background:#fdf4ff;color:#6b21a8}
+.badge-closed{background:#f0fdf4;color:#166534}
+.badge-sm{font-size:.72rem;padding:4px 10px;border-radius:20px;font-weight:600}
+
+/* ── BUTTONS ── */
+.btn-navy{background:linear-gradient(135deg,var(--navy),var(--navy-mid));color:#fff;border:0;font-weight:600;transition:all .3s}
+.btn-navy:hover{background:linear-gradient(135deg,var(--navy-mid),var(--navy));color:#fff;transform:translateY(-1px);box-shadow:0 6px 20px rgba(27,42,94,.3)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-lt));color:#fff;border:0;font-weight:600}
+.btn-gold:hover{color:#fff;transform:translateY(-1px);box-shadow:0 6px 16px rgba(201,168,76,.4)}
+
+/* ── FORMS ── */
+.form-control,.form-select{font-family:'Cairo',sans-serif;font-size:.9rem;border:1.5px solid rgba(27,42,94,.12);border-radius:var(--radius-sm);transition:all .25s}
+.form-control:focus,.form-select:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(27,42,94,.1)}
+.section-divider{position:relative;text-align:center;margin:1.25rem 0}
+.section-divider::before{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(27,42,94,.15),transparent)}
+.section-divider span{position:relative;background:#fff;padding:0 1rem;color:var(--navy);font-weight:700;font-size:.85rem}
+
+/* ── STUDENT AVATAR ── */
+.student-ava{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-lt));color:#fff;font-size:1.3rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.student-ava-lg{width:72px;height:72px;font-size:1.8rem}
+
+/* ── CHAT ── */
+.chat-wrap{display:flex;height:calc(100vh - 130px);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-md)}
+.chat-sidebar{width:300px;border-left:1px solid var(--border);background:#fff;overflow-y:auto;flex-shrink:0}
+.chat-main{flex:1;display:flex;flex-direction:column;background:#f8f9fc}
+.chat-header{background:#fff;padding:.9rem 1.2rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.75rem}
+.chat-messages{flex:1;overflow-y:auto;padding:1.2rem;display:flex;flex-direction:column;gap:.6rem}
+.chat-input-wrap{padding:.9rem 1.2rem;background:#fff;border-top:1px solid var(--border)}
+.msg-bubble{max-width:72%;padding:.65rem 1rem;border-radius:16px;font-size:.88rem;line-height:1.55;position:relative}
+.msg-me{background:linear-gradient(135deg,var(--navy),var(--navy-mid));color:#fff;border-bottom-right-radius:4px;align-self:flex-start}
+.msg-other{background:#fff;color:var(--text-main);border-bottom-left-radius:4px;align-self:flex-end;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.msg-time{font-size:.65rem;opacity:.65;margin-top:3px;display:block}
+.conv-item{padding:.85rem 1rem;border-bottom:1px solid rgba(27,42,94,.06);cursor:pointer;transition:all .2s;text-decoration:none;display:block;color:inherit}
+.conv-item:hover,.conv-item.active{background:var(--navy-pale);color:inherit}
+.conv-unread{width:8px;height:8px;border-radius:50%;background:var(--gold);flex-shrink:0}
+
+/* ── ANALYTICS ── */
+.chart-card{border-radius:var(--radius)!important;border:0!important;box-shadow:var(--shadow-sm)}
+.heatmap-cell{width:32px;height:32px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;transition:all .2s;cursor:pointer}
+.heatmap-cell:hover{transform:scale(1.15)}
+.ews-bar{height:8px;border-radius:4px;transition:width .6s ease}
+.leaderboard-rank{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.78rem;flex-shrink:0}
+
+/* ── BREADCRUMB ── */
+.breadcrumb{font-size:.8rem}
+.breadcrumb-item+.breadcrumb-item::before{content:"‹";color:var(--gold)}
+
+/* ── UTILITIES ── */
+.text-navy{color:var(--navy)!important}
+.text-gold{color:var(--gold)!important}
+.bg-navy{background:var(--navy)!important}
+.bg-gold{background:var(--gold)!important}
+.rounded-navy{border-radius:var(--radius)!important}
+.fw-700{font-weight:700!important}
+.fw-800{font-weight:800!important}
+.line-clamp-1{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.line-clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.dropdown-menu{font-family:'Cairo',sans-serif;font-size:.88rem}
+.dropdown-item{padding:.5rem .85rem;border-radius:8px;transition:all .15s}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:rgba(27,42,94,.2);border-radius:3px}
+::-webkit-scrollbar-track{background:transparent}

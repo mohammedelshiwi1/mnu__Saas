@@ -1,0 +1,42 @@
+{% extends 'base/base.html' %}
+{% block title %}التقارير{% endblock %}
+{% block content %}
+<div class="container px-4" style="max-width:900px">
+  <div class="page-header"><h4 class="page-title"><i class="bi bi-file-earmark-bar-graph"></i>التقارير والتصدير</h4></div>
+  <div class="row g-4">
+    <div class="col-md-4">
+      <div class="card h-100" style="transition:all .3s" onmouseenter="this.style.transform='translateY(-4px)'" onmouseleave="this.style.transform=''">
+        <div class="card-body p-4 d-flex flex-column">
+          <div class="mb-3" style="width:64px;height:64px;background:rgba(27,42,94,.08);border-radius:16px;display:flex;align-items:center;justify-content:center"><i class="bi bi-file-earmark-word-fill" style="color:#1B2A5E;font-size:2rem"></i></div>
+          <h5 class="fw-bold text-navy mb-2">تقرير Word</h5>
+          <p class="text-muted small flex-grow-1">تقرير شامل بكل الطلاب والشكاوى والإحصائيات مع هيدر وفوتر رسمي وخانات التوقيع.</p>
+          <p class="text-muted small mb-3">للحصول على استمارة طالب: اذهب لصفحة الطلاب واضغط <i class="bi bi-file-word mx-1"></i></p>
+          <a href="{% url 'student_list' %}" class="btn btn-navy rounded-3 fw-bold py-2"><i class="bi bi-people me-2"></i>قائمة الطلاب</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card h-100" style="transition:all .3s;border-top:3px solid #10b981!important" onmouseenter="this.style.transform='translateY(-4px)'" onmouseleave="this.style.transform=''">
+        <div class="card-body p-4 d-flex flex-column">
+          <div class="mb-3" style="width:64px;height:64px;background:rgba(16,185,129,.1);border-radius:16px;display:flex;align-items:center;justify-content:center"><i class="bi bi-file-earmark-excel-fill" style="color:#10b981;font-size:2rem"></i></div>
+          <h5 class="fw-bold text-navy mb-2">تصدير Excel</h5>
+          <p class="text-muted small flex-grow-1">ملف Excel منسّق بـ 4 شيتات: ملخص + طلاب + مواد + شكاوى مع ألوان ومخطط بياني.</p>
+          <ul class="list-unstyled small text-muted mb-3"><li><i class="bi bi-check2 me-1 text-success"></i>4 شيتات منظمة</li><li><i class="bi bi-check2 me-1 text-success"></i>ألوان حسب GPA</li><li><i class="bi bi-check2 me-1 text-success"></i>عمود EWS</li></ul>
+          <a href="{% url 'semester_excel' %}" class="btn rounded-3 fw-bold py-2" style="background:#10b981;color:#fff;border:none"><i class="bi bi-download me-2"></i>تحميل .xlsx</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card h-100" style="transition:all .3s;border-top:3px solid #C9A84C!important" onmouseenter="this.style.transform='translateY(-4px)'" onmouseleave="this.style.transform=''">
+        <div class="card-body p-4 d-flex flex-column">
+          <div class="mb-3" style="width:64px;height:64px;background:rgba(201,168,76,.12);border-radius:16px;display:flex;align-items:center;justify-content:center"><i class="bi bi-graph-up-arrow" style="color:#C9A84C;font-size:2rem"></i></div>
+          <h5 class="fw-bold text-navy mb-2">التحليلات المتقدمة</h5>
+          <p class="text-muted small flex-grow-1">رؤى شاملة ومخططات تفاعلية ونظام الإنذار المبكر وأداء المرشدين.</p>
+          <ul class="list-unstyled small text-muted mb-3"><li><i class="bi bi-check2 me-1 text-success"></i>Heatmap الفصول</li><li><i class="bi bi-check2 me-1 text-success"></i>EWS للطلاب</li><li><i class="bi bi-check2 me-1 text-success"></i>أداء المرشدين</li></ul>
+          <a href="{% url 'analytics' %}" class="btn rounded-3 fw-bold py-2" style="background:#C9A84C;color:#fff;border:none"><i class="bi bi-bar-chart-fill me-2"></i>فتح التحليلات</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

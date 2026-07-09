@@ -1,0 +1,102 @@
+{% extends 'base/base.html' %}
+{% block title %}الطلاب{% endblock %}
+{% block content %}
+<div class="container-fluid px-4">
+  <div class="page-header">
+    <h4 class="page-title"><i class="bi bi-people"></i>{% if request.user.is_advisor %}طلابي{% else %}جميع الطلاب{% endif %}</h4>
+    <a href="{% url 'student_add' %}" class="btn btn-navy rounded-pill px-4"><i class="bi bi-person-plus me-1"></i>إضافة طالب</a>
+  </div>
+
+  <!-- Filters -->
+  <div class="card mb-4">
+    <div class="card-body py-3 px-4">
+      <form method="GET" class="d-flex flex-wrap gap-3 align-items-center">
+        <div class="input-group" style="max-width:280px">
+          <span class="input-group-text bg-white border-end-0 rounded-end-3"><i class="bi bi-search text-muted"></i></span>
+          <input type="text" name="q" value="{{ q }}" class="form-control border-start-0 rounded-start-0" placeholder="ابحث بالاسم أو الرقم...">
+        </div>
+        {% if request.user.is_admin and advisors %}
+        <select name="advisor" class="form-select" style="max-width:200px">
+          <option value="">كل المرشدين</option>
+          {% for adv in advisors %}<option value="{{ adv.pk }}" {% if request.GET.advisor == adv.pk|stringformat:'s' %}selected{% endif %}>{{ adv.display_name }}</option>{% endfor %}
+        </select>
+        {% endif %}
+        <div class="d-flex gap-2 flex-wrap">
+          <a href="?" class="btn btn-sm rounded-pill {% if not filter %}btn-navy{% else %}btn-outline-secondary{% endif %}">الكل</a>
+          <a href="?filter=excellent{% if q %}&q={{ q }}{% endif %}" class="btn btn-sm rounded-pill {% if filter == 'excellent' %}btn-success{% else %}btn-outline-success{% endif %}">متفوقون</a>
+          <a href="?filter=stable{% if q %}&q={{ q }}{% endif %}"    class="btn btn-sm rounded-pill {% if filter == 'stable' %}btn-primary{% else %}btn-outline-primary{% endif %}">مستقرون</a>
+          <a href="?filter=danger{% if q %}&q={{ q }}{% endif %}"    class="btn btn-sm rounded-pill {% if filter == 'danger' %}btn-danger{% else %}btn-outline-danger{% endif %}">في خطر</a>
+        </div>
+        <button type="submit" class="btn btn-sm btn-outline-secondary rounded-pill px-3"><i class="bi bi-funnel me-1"></i>تطبيق</button>
+        {% if q or filter or request.GET.advisor %}<a href="?" class="btn btn-sm btn-link text-muted">مسح</a>{% endif %}
+      </form>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body p-0">
+      {% if enrollments %}
+      <div class="table-responsive">
+        <table class="table mnu-table mb-0">
+          <thead>
+            <tr>
+              <th>الرقم</th><th>الاسم الكامل</th>
+              {% if request.user.is_admin %}<th>المرشد</th>{% endif %}
+              <th>المستوى</th><th>الساعات</th><th>GPA</th><th>EWS</th><th>الحالة</th><th>الإقرار</th><th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for enr in enrollments %}
+            <tr class="{% if enr.gpa and enr.gpa < 2.5 %}tr-danger{% endif %}">
+              <td><span class="badge bg-light text-dark font-monospace fw-bold">{{ enr.student.student_id }}</span></td>
+              <td>
+                <a href="{% url 'student_detail' enr.student.pk %}" class="fw-semibold text-navy text-decoration-none">{{ enr.student.full_name }}</a>
+              </td>
+              {% if request.user.is_admin %}<td class="text-muted small">{{ enr.student.advisor.display_name|default:"-" }}</td>{% endif %}
+              <td><span class="badge badge-sm badge-unknown">{{ enr.student.get_level_display }}</span></td>
+              <td class="text-muted small">{{ enr.registered_hours }} س</td>
+              <td>
+                {% if enr.gpa %}
+                <span class="fw-bold {% if enr.gpa >= 3.0 %}text-success{% elif enr.gpa >= 2.5 %}text-primary{% else %}text-danger{% endif %}">{{ enr.gpa }}</span>
+                {% else %}<span class="text-muted">-</span>{% endif %}
+              </td>
+              <td>
+                <div class="d-flex align-items-center gap-1">
+                  <div style="width:{{ enr.early_warning_score }}px;max-width:55px;height:8px;border-radius:4px;
+                    background:{% if enr.early_warning_score > 60 %}#ef4444{% elif enr.early_warning_score > 30 %}#f59e0b{% else %}#10b981{% endif %}"></div>
+                  <span class="text-muted" style="font-size:.7rem">{{ enr.early_warning_score }}</span>
+                </div>
+              </td>
+              <td>
+                {% if enr.gpa %}
+                  {% if enr.gpa >= 3.0 %}<span class="badge badge-sm badge-excellent">متفوق</span>
+                  {% elif enr.gpa >= 2.5 %}<span class="badge badge-sm badge-stable">مستقر</span>
+                  {% else %}<span class="badge badge-sm badge-danger">في خطر</span>{% endif %}
+                {% else %}<span class="badge badge-sm badge-unknown">-</span>{% endif %}
+              </td>
+              <td>
+                {% if enr.data_confirmed %}<i class="bi bi-check-circle-fill text-success" title="أقرّ بصحة البيانات"></i>
+                {% else %}<i class="bi bi-clock text-muted" title="لم يقر بعد"></i>{% endif %}
+              </td>
+              <td>
+                <div class="d-flex gap-1">
+                  <a href="{% url 'student_detail' enr.student.pk %}"  class="btn btn-sm btn-outline-primary rounded-2" title="عرض"><i class="bi bi-eye"></i></a>
+                  <a href="{% url 'student_edit' enr.student.pk %}"    class="btn btn-sm btn-outline-secondary rounded-2" title="تعديل"><i class="bi bi-pencil"></i></a>
+                  <a href="{% url 'student_word' enr.student.pk %}"    class="btn btn-sm btn-outline-success rounded-2" title="Word"><i class="bi bi-file-word"></i></a>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="text-center py-5 text-muted">
+        <i class="bi bi-person-x fs-1 d-block mb-3 opacity-25"></i>
+        <p>{% if q %}لا توجد نتائج لـ "{{ q }}"{% else %}لا يوجد طلاب{% endif %}</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

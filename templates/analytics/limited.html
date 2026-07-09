@@ -1,0 +1,8 @@
+{% extends 'base/base.html' %}
+{% block content %}
+<div class="container text-center py-5">
+  <i class="bi bi-lock-fill fs-1 text-muted opacity-25 d-block mb-3"></i>
+  <h5 class="text-muted">هذه الصفحة متاحة للإدارة فقط</h5>
+  <a href="{% url 'dashboard' %}" class="btn btn-navy rounded-pill px-4 mt-3">رجوع للرئيسية</a>
+</div>
+{% endblock %}

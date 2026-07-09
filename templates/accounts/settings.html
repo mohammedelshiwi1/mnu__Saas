@@ -1,0 +1,72 @@
+{% extends 'base/base.html' %}
+{% block title %}الإعدادات{% endblock %}
+{% block content %}
+<div class="container px-4" style="max-width:760px">
+  <div class="page-header">
+    <h4 class="page-title"><i class="bi bi-gear-fill"></i>الإعدادات الشخصية</h4>
+  </div>
+  <div class="row g-4">
+    <div class="col-12">
+      <div class="card overflow-hidden">
+        <div class="card-header card-header-navy py-3 px-4"><h6 class="text-white fw-bold mb-0"><i class="bi bi-person-circle me-2" style="color:#C9A84C"></i>البيانات الشخصية</h6></div>
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center gap-4 mb-4 pb-4" style="border-bottom:1px solid rgba(27,42,94,.08)">
+            <div class="student-ava student-ava-lg">{{ user.initials }}</div>
+            <div>
+              <h5 class="fw-bold mb-1 text-navy">{{ user.display_name }}</h5>
+              <div class="text-muted small mb-1">{{ user.get_role_display }}</div>
+              <div class="text-muted small">{{ user.email|default:"لا يوجد بريد" }}</div>
+            </div>
+          </div>
+          <form method="POST">{% csrf_token %}
+            <input type="hidden" name="action" value="profile">
+            <div class="row g-3">
+              <div class="col-md-6"><label class="form-label fw-semibold small text-navy">الاسم الكامل</label><input type="text" name="full_name" class="form-control" value="{{ user.full_name }}"></div>
+              <div class="col-md-6"><label class="form-label fw-semibold small text-navy">اللقب العلمي</label><input type="text" name="title" class="form-control" value="{{ user.title }}" placeholder="مدرس مساعد / دكتور..."></div>
+              <div class="col-md-6"><label class="form-label fw-semibold small text-navy">القسم</label><input type="text" name="department" class="form-control" value="{{ user.department }}"></div>
+              <div class="col-md-6"><label class="form-label fw-semibold small text-navy">رقم الهاتف</label><input type="text" name="phone" class="form-control" value="{{ user.phone }}"></div>
+              <div class="col-12"><label class="form-label fw-semibold small text-navy">البريد الإلكتروني</label><input type="email" name="email" class="form-control" value="{{ user.email }}"></div>
+              <div class="col-12"><label class="form-label fw-semibold small text-muted">اسم المستخدم (لا يمكن تغييره)</label><input type="text" class="form-control bg-light" value="{{ user.username }}" disabled></div>
+            </div>
+            <div class="mt-4 d-flex justify-content-end">
+              <button type="submit" class="btn btn-navy rounded-3 px-5 fw-bold"><i class="bi bi-check2-circle me-2"></i>حفظ</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="col-12">
+      <div class="card overflow-hidden">
+        <div class="card-header card-header-navy py-3 px-4"><h6 class="text-white fw-bold mb-0"><i class="bi bi-shield-lock me-2" style="color:#C9A84C"></i>تغيير كلمة المرور</h6></div>
+        <div class="card-body p-4">
+          <form method="POST">{% csrf_token %}
+            <input type="hidden" name="action" value="password">
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label fw-semibold small text-navy">كلمة المرور الحالية</label>
+                <div class="input-group"><input type="password" name="old_password" id="p1" class="form-control" required><button type="button" class="btn btn-outline-secondary" onclick="tg('p1','e1')"><i class="bi bi-eye" id="e1"></i></button></div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold small text-navy">كلمة المرور الجديدة</label>
+                <div class="input-group"><input type="password" name="new_password" id="p2" class="form-control" required minlength="6"><button type="button" class="btn btn-outline-secondary" onclick="tg('p2','e2')"><i class="bi bi-eye" id="e2"></i></button></div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold small text-navy">تأكيد كلمة المرور</label>
+                <div class="input-group"><input type="password" name="new_password2" id="p3" class="form-control" required><button type="button" class="btn btn-outline-secondary" onclick="tg('p3','e3')"><i class="bi bi-eye" id="e3"></i></button></div>
+              </div>
+            </div>
+            <div class="mt-4 d-flex justify-content-end">
+              <button type="submit" class="btn rounded-3 px-5 fw-bold" style="background:#C9A84C;color:#fff;border:none"><i class="bi bi-key me-2"></i>تغيير كلمة المرور</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+function tg(fid,eid){const f=document.getElementById(fid);const i=document.getElementById(eid);f.type=f.type==='password'?'text':'password';i.className=f.type==='text'?'bi bi-eye-slash':'bi bi-eye';}
+</script>
+{% endblock %}

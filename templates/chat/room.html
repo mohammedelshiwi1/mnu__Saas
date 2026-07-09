@@ -1,0 +1,135 @@
+{% extends 'base/base.html' %}
+{% block title %}محادثة - {% if request.user.is_advisor %}{{ conv.student.full_name }}{% else %}{{ conv.advisor.display_name }}{% endif %}{% endblock %}
+
+{% block extra_css %}
+<style>
+.chat-page { height: calc(100vh - 70px); display: flex; flex-direction: column; }
+.chat-hdr  { background:#fff; padding:.85rem 1.25rem; border-bottom:1px solid rgba(27,42,94,.1); display:flex; align-items:center; gap:.75rem; flex-shrink:0; }
+.chat-msgs { flex:1; overflow-y:auto; padding:1.25rem; background:#f0f3f9; display:flex; flex-direction:column; gap:.5rem; }
+.chat-inp  { background:#fff; padding:.9rem 1.25rem; border-top:1px solid rgba(27,42,94,.1); flex-shrink:0; }
+.bubble    { max-width:68%; padding:.65rem 1rem; border-radius:16px; font-size:.88rem; line-height:1.55; }
+.bubble-me    { background:linear-gradient(135deg,#1B2A5E,#243570); color:#fff; border-bottom-right-radius:4px; align-self:flex-start; }
+.bubble-other { background:#fff; color:#1a1a2e; border-bottom-left-radius:4px; align-self:flex-end; box-shadow:0 1px 4px rgba(0,0,0,.07); }
+.msg-time  { font-size:.63rem; opacity:.6; margin-top:3px; display:block; }
+.msg-name  { font-size:.7rem; font-weight:600; margin-bottom:3px; opacity:.75; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="chat-page">
+  <div class="chat-hdr">
+    <a href="{% url 'chat_list' %}" class="btn btn-sm btn-outline-secondary rounded-2 me-1"><i class="bi bi-arrow-right"></i></a>
+    <div class="student-ava" style="width:38px;height:38px;font-size:.95rem">
+      {% if request.user.is_advisor %}{{ conv.student.full_name|slice:":1" }}
+      {% else %}{{ conv.advisor.initials }}{% endif %}
+    </div>
+    <div>
+      <div class="fw-bold small text-navy">
+        {% if request.user.is_advisor %}{{ conv.student.full_name }}
+        {% else %}{{ conv.advisor.display_name }}{% endif %}
+      </div>
+      <div class="text-muted" style="font-size:.72rem">
+        {% if request.user.is_advisor %}{{ conv.student.student_id }} · {{ conv.student.get_level_display }}
+        {% else %}{{ conv.advisor.title|default:"مرشد أكاديمي" }}{% endif %}
+      </div>
+    </div>
+    {% if request.user.is_advisor %}
+    <a href="{% url 'student_detail' conv.student.pk %}" class="btn btn-sm btn-outline-primary rounded-pill ms-auto"><i class="bi bi-person-lines-fill me-1"></i>ملف الطالب</a>
+    {% endif %}
+  </div>
+
+  <div class="chat-msgs" id="msgContainer">
+    {% for msg in messages %}
+    <div class="d-flex flex-column {% if msg.sender == request.user %}align-items-start{% else %}align-items-end{% endif %}">
+      {% if msg.sender != request.user %}
+      <div class="msg-name text-muted px-1">{{ msg.sender.display_name }}</div>
+      {% endif %}
+      <div class="bubble {% if msg.sender == request.user %}bubble-me{% else %}bubble-other{% endif %}">
+        {{ msg.body }}
+        <span class="msg-time">{{ msg.created_at|date:"H:i" }}</span>
+      </div>
+    </div>
+    {% empty %}
+    <div class="text-center text-muted py-5">
+      <i class="bi bi-chat-heart fs-2 d-block mb-2 opacity-25"></i>
+      <p class="small">ابدأ المحادثة...</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="chat-inp">
+    <form id="msgForm" class="d-flex gap-2" onsubmit="sendMsg(event)">
+      {% csrf_token %}
+      <input type="text" id="msgInput" class="form-control rounded-pill" placeholder="اكتب رسالتك هنا..." autocomplete="off" required>
+      <button type="submit" class="btn btn-navy rounded-pill px-4" style="white-space:nowrap">
+        <i class="bi bi-send-fill"></i>
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const CONV_ID = {{ conv.pk }};
+const CSRF    = document.querySelector('[name=csrfmiddlewaretoken]').value;
+let lastId    = {% if messages %}{{ messages.last.pk|default:0 }}{% else %}0{% endif %};
+const container = document.getElementById('msgContainer');
+const input     = document.getElementById('msgInput');
+
+function scrollBottom() { container.scrollTop = container.scrollHeight; }
+scrollBottom();
+
+function addBubble(msg) {
+  const wrap = document.createElement('div');
+  wrap.className = `d-flex flex-column ${msg.is_me ? 'align-items-start' : 'align-items-end'}`;
+  if (!msg.is_me) {
+    const name = document.createElement('div');
+    name.className = 'msg-name text-muted px-1';
+    name.textContent = msg.sender;
+    wrap.appendChild(name);
+  }
+  const bub = document.createElement('div');
+  bub.className = `bubble ${msg.is_me ? 'bubble-me' : 'bubble-other'}`;
+  bub.innerHTML = `${msg.body}<span class="msg-time">${msg.time}</span>`;
+  wrap.appendChild(bub);
+  // Remove empty state if present
+  const empty = container.querySelector('.text-center.text-muted');
+  if (empty) empty.remove();
+  container.appendChild(wrap);
+  scrollBottom();
+}
+
+async function sendMsg(e) {
+  e.preventDefault();
+  const body = input.value.trim();
+  if (!body) return;
+  input.value = '';
+  try {
+    const r = await fetch(`/chat/${CONV_ID}/send/`, {
+      method:'POST',
+      headers:{'Content-Type':'application/x-www-form-urlencoded','X-CSRFToken':CSRF},
+      body:`body=${encodeURIComponent(body)}&ajax=1`
+    });
+    const data = await r.json();
+    addBubble(data);
+    lastId = data.id;
+  } catch(err) { console.error(err); }
+}
+
+// Poll for new messages every 3 seconds
+async function poll() {
+  try {
+    const r = await fetch(`/chat/${CONV_ID}/messages/?after=${lastId}`);
+    const data = await r.json();
+    data.messages.forEach(m => { addBubble(m); lastId = m.id; });
+  } catch(err) {}
+}
+setInterval(poll, 3000);
+
+// Send on Enter
+input.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); document.getElementById('msgForm').dispatchEvent(new Event('submit')); }
+});
+</script>
+{% endblock %}

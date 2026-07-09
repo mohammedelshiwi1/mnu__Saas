@@ -1,0 +1,97 @@
+{% extends 'base/base.html' %}
+{% block title %}إدارة المستخدمين{% endblock %}
+{% block content %}
+<div class="container-fluid px-4" style="max-width:1000px">
+  <div class="page-header">
+    <h4 class="page-title"><i class="bi bi-shield-person"></i>إدارة المستخدمين</h4>
+  </div>
+  <div class="row g-4">
+    <!-- Create User -->
+    <div class="col-lg-5">
+      <div class="card overflow-hidden">
+        <div class="card-header card-header-navy py-3 px-4"><h6 class="text-white fw-bold mb-0"><i class="bi bi-person-plus me-2" style="color:#C9A84C"></i>إنشاء مستخدم جديد</h6></div>
+        <div class="card-body p-4">
+          <form method="POST">{% csrf_token %}
+            <input type="hidden" name="action" value="create_user">
+            <div class="mb-3"><label class="form-label fw-semibold small text-navy">اسم المستخدم *</label><input type="text" name="username" class="form-control" required></div>
+            <div class="mb-3"><label class="form-label fw-semibold small text-navy">الاسم الكامل</label><input type="text" name="full_name" class="form-control"></div>
+            <div class="mb-3"><label class="form-label fw-semibold small text-navy">الدور *</label>
+              <select name="role" class="form-select">
+                <option value="advisor">مرشد أكاديمي</option>
+                <option value="head">رئيس وحدة الإرشاد</option>
+                <option value="admin">أدمن / إداري</option>
+                <option value="student">طالب</option>
+              </select>
+            </div>
+            <div class="mb-3"><label class="form-label fw-semibold small text-navy">اللقب العلمي</label><input type="text" name="title" class="form-control" placeholder="مدرس مساعد / دكتور..."></div>
+            <div class="mb-3"><label class="form-label fw-semibold small text-navy">القسم</label><input type="text" name="department" class="form-control"></div>
+            <div class="mb-3"><label class="form-label fw-semibold small text-navy">البريد</label><input type="email" name="email" class="form-control"></div>
+            <div class="mb-4"><label class="form-label fw-semibold small text-navy">كلمة المرور *</label><input type="password" name="password" class="form-control" required minlength="6"></div>
+            <button type="submit" class="btn btn-navy rounded-3 w-100 fw-bold"><i class="bi bi-person-check me-2"></i>إنشاء المستخدم</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <!-- Advisors List + Assign -->
+    <div class="col-lg-7">
+      <div class="card mb-4">
+        <div class="card-header card-header-navy py-3 px-4"><h6 class="text-white fw-bold mb-0"><i class="bi bi-people me-2" style="color:#C9A84C"></i>المرشدون الأكاديميون</h6></div>
+        <div class="card-body p-0">
+          {% if advisors %}
+          <div class="table-responsive">
+            <table class="table mnu-table mb-0">
+              <thead><tr><th>الاسم</th><th>اللقب</th><th>القسم</th><th>الطلاب</th><th>الحالة</th><th></th></tr></thead>
+              <tbody>
+                {% for adv in advisors %}
+                <tr>
+                  <td class="fw-semibold">{{ adv.display_name }}</td>
+                  <td class="text-muted small">{{ adv.title|default:"-" }}</td>
+                  <td class="text-muted small">{{ adv.department|default:"-" }}</td>
+                  <td><span class="badge badge-sm badge-unknown">{{ adv.advised_students.count }}</span></td>
+                  <td>{% if adv.is_active %}<span class="badge badge-sm badge-excellent">نشط</span>{% else %}<span class="badge badge-sm badge-danger">معطّل</span>{% endif %}</td>
+                  <td>
+                    <form method="POST" class="d-inline">{% csrf_token %}
+                      <input type="hidden" name="action" value="toggle_active">
+                      <input type="hidden" name="user_id" value="{{ adv.pk }}">
+                      <button type="submit" class="btn btn-sm {% if adv.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %} rounded-2">
+                        {% if adv.is_active %}<i class="bi bi-ban"></i>{% else %}<i class="bi bi-check2"></i>{% endif %}
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="text-center py-4 text-muted small">لا يوجد مرشدون</div>
+          {% endif %}
+        </div>
+      </div>
+      {% if unassigned %}
+      <div class="card">
+        <div class="card-header card-header-navy py-3 px-4"><h6 class="text-white fw-bold mb-0"><i class="bi bi-person-dash me-2" style="color:#C9A84C"></i>طلاب بدون مرشد ({{ unassigned|length }})</h6></div>
+        <div class="card-body p-4">
+          <form method="POST">{% csrf_token %}
+            <input type="hidden" name="action" value="assign_advisor">
+            <div class="row g-3">
+              <div class="col-md-6"><label class="form-label fw-semibold small text-navy">الطالب</label>
+                <select name="student_id" class="form-select">
+                  {% for st in unassigned %}<option value="{{ st.pk }}">{{ st.full_name }} ({{ st.student_id }})</option>{% endfor %}
+                </select>
+              </div>
+              <div class="col-md-6"><label class="form-label fw-semibold small text-navy">المرشد</label>
+                <select name="advisor_id" class="form-select">
+                  {% for adv in advisors %}<option value="{{ adv.pk }}">{{ adv.display_name }}</option>{% endfor %}
+                </select>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-navy rounded-3 mt-3 px-4 fw-bold"><i class="bi bi-person-check me-2"></i>تعيين المرشد</button>
+          </form>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

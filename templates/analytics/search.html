@@ -1,0 +1,145 @@
+{% extends 'base/base.html' %}
+{% block title %}البحث المتقدم - MNU{% endblock %}
+{% block content %}
+<div class="container-fluid px-4" style="max-width:1000px">
+  <div class="page-header">
+    <h4 class="page-title"><i class="bi bi-search"></i>البحث المتقدم</h4>
+  </div>
+  <div class="card mb-4">
+    <div class="card-body p-4">
+      <form method="GET">
+        <div class="row g-3 align-items-end">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold small text-navy">البحث</label>
+            <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="ابحث بالاسم أو الرقم الجامعي أو الرقم القومي...">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small text-navy">نوع البحث</label>
+            <select name="mode" class="form-select">
+              <option value="student" {% if mode == 'student' %}selected{% endif %}>بحث عن طالب</option>
+              <option value="advisor" {% if mode == 'advisor' %}selected{% endif %}>بحث عن مرشد أكاديمي</option>
+            </select>
+          </div>
+          <div class="col-md-2"><button type="submit" class="btn btn-navy w-100 rounded-3"><i class="bi bi-search me-1"></i>بحث</button></div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {% if profile_student %}
+  <div class="card mb-4 overflow-hidden">
+    <div class="p-4" style="background:linear-gradient(135deg,#1B2A5E,#243570)">
+      <div class="d-flex align-items-center gap-3 text-white">
+        <div class="student-ava student-ava-lg">{{ profile_student.full_name|slice:":1" }}</div>
+        <div>
+          <h5 class="fw-bold mb-1">{{ profile_student.full_name }}</h5>
+          <div class="d-flex gap-3" style="font-size:.84rem;opacity:.8">
+            <span><i class="bi bi-hash me-1" style="color:#C9A84C"></i>{{ profile_student.student_id }}</span>
+            <span><i class="bi bi-mortarboard me-1" style="color:#C9A84C"></i>{{ profile_student.get_level_display }}</span>
+            <span><i class="bi bi-person-badge me-1" style="color:#C9A84C"></i>{{ profile_student.advisor.display_name|default:"غير مُعيَّن" }}</span>
+          </div>
+        </div>
+        <a href="{% url 'student_detail' profile_student.pk %}" class="btn btn-sm rounded-pill ms-auto" style="background:rgba(255,255,255,.15);color:#fff">عرض الملف الكامل</a>
+      </div>
+    </div>
+    <div class="card-body">
+      <h6 class="fw-bold mb-3 text-navy">السجل الأكاديمي</h6>
+      <div class="table-responsive">
+        <table class="table mnu-table mb-0">
+          <thead><tr><th>الفصل</th><th>الساعات المسجلة</th><th>GPA</th><th>الحالة</th><th>الإقرار</th></tr></thead>
+          <tbody>
+            {% for e in profile_student.all_enrollments %}
+            <tr>
+              <td class="fw-semibold">{{ e.semester }}</td>
+              <td>{{ e.registered_hours }} س</td>
+              <td><span class="fw-bold {% if e.gpa >= 3 %}text-success{% elif e.gpa >= 2.5 %}text-primary{% else %}text-danger{% endif %}">{{ e.gpa|default:"-" }}</span></td>
+              <td>{% if e.gpa %}{% if e.gpa >= 3 %}<span class="badge badge-sm badge-excellent">متفوق</span>{% elif e.gpa >= 2.5 %}<span class="badge badge-sm badge-stable">مستقر</span>{% else %}<span class="badge badge-sm badge-danger">في خطر</span>{% endif %}{% endif %}</td>
+              <td>{% if e.data_confirmed %}<span class="badge badge-sm badge-excellent"><i class="bi bi-check me-1"></i>مؤكد</span>{% else %}<span class="badge badge-sm badge-unknown">لا</span>{% endif %}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% if profile_student.all_complaints %}
+      <h6 class="fw-bold mb-3 mt-4 text-navy">الشكاوى</h6>
+      <div class="table-responsive">
+        <table class="table mnu-table mb-0">
+          <thead><tr><th>العنوان</th><th>الفصل</th><th>الحالة</th><th>التاريخ</th></tr></thead>
+          <tbody>
+            {% for c in profile_student.all_complaints %}
+            <tr><td>{{ c.title }}</td><td>{{ c.semester }}</td><td><span class="badge badge-sm badge-{{ c.status }}">{{ c.get_status_display }}</span></td><td class="text-muted small">{{ c.created_at|date:"Y/m/d" }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if profile_advisor %}
+  <div class="card mb-4 overflow-hidden">
+    <div class="p-4" style="background:linear-gradient(135deg,#1B2A5E,#243570)">
+      <div class="d-flex align-items-center gap-3 text-white">
+        <div class="student-ava student-ava-lg" style="background:linear-gradient(135deg,#C9A84C,#d4b76e)">{{ profile_advisor.display_name|slice:":1" }}</div>
+        <div>
+          <h5 class="fw-bold mb-1">{{ profile_advisor.display_name }}</h5>
+          <div class="d-flex gap-3" style="font-size:.84rem;opacity:.8">
+            <span><i class="bi bi-briefcase me-1" style="color:#C9A84C"></i>{{ profile_advisor.title|default:"مرشد أكاديمي" }}</span>
+            <span><i class="bi bi-building me-1" style="color:#C9A84C"></i>{{ profile_advisor.department|default:"-" }}</span>
+          </div>
+        </div>
+        <div class="ms-auto text-center p-3 rounded-3" style="background:rgba(255,255,255,.12)">
+          <div class="fw-bold text-white" style="font-size:1.6rem;line-height:1">{{ profile_advisor.avg_gpa }}</div>
+          <div style="font-size:.7rem;opacity:.75">متوسط GPA</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="row g-3 mb-3">
+        <div class="col-md-4"><div class="text-center p-3 rounded-3" style="background:var(--navy-pale)"><div class="fw-bold fs-4 text-navy">{{ profile_advisor.my_students.count }}</div><div class="text-muted small">إجمالي الطلاب</div></div></div>
+        <div class="col-md-4"><div class="text-center p-3 rounded-3" style="background:rgba(16,185,129,.07)"><div class="fw-bold fs-4" style="color:#10b981">{{ profile_advisor.avg_gpa }}</div><div class="text-muted small">متوسط GPA</div></div></div>
+        <div class="col-md-4"><div class="text-center p-3 rounded-3" style="background:rgba(239,68,68,.07)"><div class="fw-bold fs-4 text-danger">{{ profile_advisor.danger_count }}</div><div class="text-muted small">في خطر</div></div></div>
+      </div>
+      <h6 class="fw-bold mb-3 text-navy">طلابه في الفصل الحالي</h6>
+      <div class="table-responsive">
+        <table class="table mnu-table mb-0">
+          <thead><tr><th>الرقم</th><th>الاسم</th><th>المستوى</th><th>GPA</th><th>EWS</th><th>الحالة</th></tr></thead>
+          <tbody>
+            {% for e in profile_advisor.my_enrollments %}
+            <tr class="{% if e.gpa and e.gpa < 2.5 %}tr-danger{% endif %}">
+              <td><span class="badge bg-light text-dark font-monospace">{{ e.student.student_id }}</span></td>
+              <td class="fw-semibold">{{ e.student.full_name }}</td>
+              <td>{{ e.student.get_level_display }}</td>
+              <td><span class="fw-bold {% if e.gpa >= 3 %}text-success{% elif e.gpa >= 2.5 %}text-primary{% else %}text-danger{% endif %}">{{ e.gpa|default:"-" }}</span></td>
+              <td><span class="text-muted small">{{ e.early_warning_score }}%</span></td>
+              <td>{% if e.gpa %}{% if e.gpa >= 3 %}<span class="badge badge-sm badge-excellent">متفوق</span>{% elif e.gpa >= 2.5 %}<span class="badge badge-sm badge-stable">مستقر</span>{% else %}<span class="badge badge-sm badge-danger">في خطر</span>{% endif %}{% endif %}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if results_students %}
+  <div class="card"><div class="card-body p-0">
+    <div class="table-responsive"><table class="table mnu-table mb-0">
+      <thead><tr><th>الرقم</th><th>الاسم</th><th>المستوى</th><th>المرشد</th><th></th></tr></thead>
+      <tbody>{% for st in results_students %}<tr>
+        <td><span class="badge bg-light text-dark font-monospace">{{ st.student_id }}</span></td>
+        <td class="fw-semibold">{{ st.full_name }}</td>
+        <td>{{ st.get_level_display }}</td>
+        <td class="text-muted small">{{ st.advisor.display_name|default:"-" }}</td>
+        <td><a href="{% url 'student_detail' st.pk %}" class="btn btn-sm btn-outline-primary rounded-2"><i class="bi bi-eye"></i></a></td>
+      </tr>{% endfor %}</tbody>
+    </table></div>
+  </div></div>
+  {% endif %}
+
+  {% if not profile_student and not profile_advisor and not results_students and not results_advisors and q %}
+  <div class="card p-5 text-center text-muted"><i class="bi bi-search fs-1 d-block mb-3 opacity-25"></i><p>لا توجد نتائج لـ "{{ q }}"</p></div>
+  {% endif %}
+</div>
+{% endblock %}

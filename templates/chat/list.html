@@ -1,0 +1,49 @@
+{% extends 'base/base.html' %}
+{% block title %}المحادثات{% endblock %}
+{% block content %}
+<div class="container-fluid px-4" style="max-width:860px">
+  <div class="page-header">
+    <h4 class="page-title"><i class="bi bi-chat-dots"></i>المحادثات</h4>
+  </div>
+  <div class="card">
+    <div class="card-body p-0">
+      {% if convs %}
+        {% for item in convs %}
+        <a href="{% url 'chat_room' item.conv.pk %}" class="conv-item d-flex align-items-center gap-3">
+          <div class="student-ava flex-shrink-0">
+            {% if request.user.is_advisor %}{{ item.conv.student.full_name|slice:":1" }}
+            {% else %}{{ item.conv.advisor.initials }}{% endif %}
+          </div>
+          <div class="flex-grow-1" style="min-width:0">
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="fw-bold small">
+                {% if request.user.is_advisor %}{{ item.conv.student.full_name }}
+                {% elif request.user.is_student %}{{ item.conv.advisor.display_name }}
+                {% else %}{{ item.conv.student.full_name }} ↔ {{ item.conv.advisor.display_name }}{% endif %}
+              </span>
+              {% if item.last %}<span class="text-muted" style="font-size:.7rem">{{ item.last.created_at|date:"H:i" }}</span>{% endif %}
+            </div>
+            <div class="d-flex justify-content-between align-items-center mt-1">
+              <span class="text-muted line-clamp-1" style="font-size:.8rem">
+                {% if item.last %}{{ item.last.body|truncatechars:60 }}{% else %}ابدأ المحادثة...{% endif %}
+              </span>
+              {% if item.unread %}<span class="badge rounded-pill ms-2" style="background:#C9A84C;color:#fff;font-size:.65rem">{{ item.unread }}</span>{% endif %}
+            </div>
+            {% if request.user.is_advisor %}
+            <div class="text-muted mt-1" style="font-size:.72rem">{{ item.conv.student.student_id }} · {{ item.conv.student.get_level_display }}</div>
+            {% endif %}
+          </div>
+          {% if item.unread %}<div class="conv-unread flex-shrink-0"></div>{% endif %}
+        </a>
+        {% endfor %}
+      {% else %}
+      <div class="text-center py-5 text-muted">
+        <i class="bi bi-chat-square fs-1 d-block mb-3 opacity-25"></i>
+        <p class="mb-1">لا توجد محادثات بعد</p>
+        <p class="small opacity-75">{% if request.user.is_student %}تواصل مع مرشدك من صفحة الطلاب{% else %}ستظهر المحادثات هنا عند بدئها{% endif %}</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

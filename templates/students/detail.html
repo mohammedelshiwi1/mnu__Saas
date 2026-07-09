@@ -1,0 +1,142 @@
+{% extends 'base/base.html' %}
+{% block title %}{{ student.full_name }}{% endblock %}
+{% block content %}
+<div class="container-fluid px-4" style="max-width:1000px">
+  <nav aria-label="breadcrumb" class="mb-3"><ol class="breadcrumb small">
+    <li class="breadcrumb-item"><a href="{% url 'student_list' %}" class="text-gold">الطلاب</a></li>
+    <li class="breadcrumb-item active">{{ student.full_name }}</li>
+  </ol></nav>
+
+  <!-- Header Card -->
+  <div class="card mb-4 overflow-hidden">
+    <div class="p-4" style="background:linear-gradient(135deg,#1B2A5E,#243570)">
+      <div class="d-flex flex-wrap align-items-center gap-3">
+        <div class="student-ava student-ava-lg">{{ student.full_name|slice:":1" }}</div>
+        <div class="text-white flex-grow-1">
+          <h4 class="fw-bold mb-1">{{ student.full_name }}</h4>
+          <div class="d-flex flex-wrap gap-3" style="font-size:.84rem;opacity:.82">
+            <span><i class="bi bi-hash me-1" style="color:#C9A84C"></i>{{ student.student_id }}</span>
+            <span><i class="bi bi-mortarboard me-1" style="color:#C9A84C"></i>{{ student.get_level_display }}</span>
+            {% if student.advisor %}<span><i class="bi bi-person-badge me-1" style="color:#C9A84C"></i>{{ student.advisor.display_name }}</span>{% endif %}
+            {% if student.phone %}<span><i class="bi bi-phone me-1" style="color:#C9A84C"></i>{{ student.phone }}</span>{% endif %}
+          </div>
+        </div>
+        {% if enrollment and enrollment.gpa %}
+        <div class="text-center p-3 rounded-3" style="background:rgba(255,255,255,.12)">
+          <div class="fw-bold text-white" style="font-size:1.9rem;line-height:1">{{ enrollment.gpa }}</div>
+          <div style="font-size:.7rem;color:rgba(255,255,255,.7)">GPA</div>
+          <div class="mt-1">
+            {% if enrollment.gpa >= 3 %}<span class="badge" style="background:#dcfce7;color:#166534;font-size:.65rem">متفوق</span>
+            {% elif enrollment.gpa >= 2.5 %}<span class="badge" style="background:#dbeafe;color:#1e40af;font-size:.65rem">مستقر</span>
+            {% else %}<span class="badge" style="background:#fee2e2;color:#991b1b;font-size:.65rem">في خطر</span>{% endif %}
+          </div>
+        </div>
+        {% endif %}
+        {% if enrollment %}
+        <div class="text-center p-3 rounded-3" style="background:rgba(255,255,255,.1)">
+          <div class="fw-bold text-white" style="font-size:1.5rem;line-height:1">{{ enrollment.early_warning_score }}%</div>
+          <div style="font-size:.7rem;color:rgba(255,255,255,.7)">EWS</div>
+          <div class="mt-1">
+            {% if enrollment.early_warning_score > 60 %}<span class="badge" style="background:#fee2e2;color:#991b1b;font-size:.65rem">خطر شديد</span>
+            {% elif enrollment.early_warning_score > 30 %}<span class="badge" style="background:#fffbeb;color:#92400e;font-size:.65rem">متابعة</span>
+            {% else %}<span class="badge" style="background:#dcfce7;color:#166534;font-size:.65rem">جيد</span>{% endif %}
+          </div>
+        </div>
+        {% endif %}
+        <div class="d-flex flex-column gap-2">
+          {% if not request.user.is_student %}
+          <a href="{% url 'student_edit' student.pk %}" class="btn btn-sm btn-light rounded-pill px-3"><i class="bi bi-pencil me-1"></i>تعديل</a>
+          <a href="{% url 'student_word' student.pk %}" class="btn btn-sm rounded-pill px-3" style="background:#C9A84C;color:#fff;border:none"><i class="bi bi-file-word me-1"></i>Word</a>
+          {% else %}
+          {% if enrollment and not enrollment.data_confirmed %}
+          <a href="{% url 'confirm_data' student.pk %}" class="btn btn-sm rounded-pill px-3" style="background:rgba(16,185,129,.2);color:#fff;border:1px solid rgba(16,185,129,.4)"><i class="bi bi-pen me-1"></i>إقرار بالبيانات</a>
+          {% elif enrollment and enrollment.data_confirmed %}
+          <div class="badge rounded-pill p-2" style="background:rgba(16,185,129,.2);color:#d1fae5"><i class="bi bi-check-circle-fill me-1"></i>تم الإقرار</div>
+          {% endif %}
+          {% endif %}
+          {% if conv %}<a href="{% url 'chat_room' conv.pk %}" class="btn btn-sm btn-outline-light rounded-pill px-3"><i class="bi bi-chat me-1"></i>محادثة</a>{% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Info -->
+    <div class="col-lg-4">
+      <div class="card mb-4">
+        <div class="card-header card-header-navy text-white py-3 px-4 rounded-top-4">
+          <h6 class="mb-0 fw-bold"><i class="bi bi-person-lines-fill me-2" style="color:#C9A84C"></i>البيانات الشخصية</h6>
+        </div>
+        <div class="card-body px-4 py-3">
+          {% for label, val in inforows %}{% endfor %}
+          {% for label, val in inforows %}{% endfor %}
+          <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted small">الرقم القومي</span><span class="fw-semibold small font-monospace">{{ student.national_id|default:"-" }}</span></div>
+          <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted small">السن</span><span class="fw-semibold small">{{ student.age|default:"-" }}</span></div>
+          <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted small">المستوى</span><span class="fw-semibold small">{{ student.get_level_display }}</span></div>
+          <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted small">الساعات المنتهية</span><span class="fw-bold text-navy">{{ student.completed_hours }} س</span></div>
+          {% if enrollment %}
+          <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted small">الساعات المسجلة</span><span class="fw-bold text-navy">{{ enrollment.registered_hours }} س</span></div>
+          <div class="d-flex justify-content-between py-2"><span class="text-muted small">إقرار البيانات</span>
+            {% if enrollment.data_confirmed %}<span class="badge badge-sm badge-excellent"><i class="bi bi-check me-1"></i>{{ enrollment.data_confirmed_at|date:"Y/m/d" }}</span>
+            {% else %}<span class="badge badge-sm badge-unknown">لم يقر بعد</span>{% endif %}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      <!-- Files -->
+      <div class="card">
+        <div class="card-header card-header-navy text-white py-3 px-4 rounded-top-4">
+          <h6 class="mb-0 fw-bold"><i class="bi bi-paperclip me-2" style="color:#C9A84C"></i>الملفات</h6>
+        </div>
+        <div class="card-body px-3 py-3">
+          {% for f in files %}
+          <div class="d-flex align-items-center gap-2 p-2 rounded-3 mb-2" style="background:var(--navy-pale)">
+            <i class="bi bi-file-earmark text-gold fs-5"></i>
+            <div class="flex-grow-1 min-width-0"><div class="small fw-semibold line-clamp-1">{{ f.description }}</div><div class="text-muted" style="font-size:.7rem">{{ f.uploaded_at|date:"Y/m/d" }}</div></div>
+            <a href="{{ f.file.url }}" class="btn btn-sm btn-outline-primary rounded-2"><i class="bi bi-download"></i></a>
+          </div>
+          {% empty %}<div class="text-center text-muted py-3 small"><i class="bi bi-folder2-open d-block fs-3 mb-1 opacity-25"></i>لا ملفات</div>{% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Main -->
+    <div class="col-lg-8">
+      {% if enrollment %}
+      <!-- Courses -->
+      <div class="card mb-4">
+        <div class="card-header card-header-navy text-white py-3 px-4 rounded-top-4">
+          <h6 class="mb-0 fw-bold"><i class="bi bi-book-fill me-2" style="color:#C9A84C"></i>المواد المسجلة</h6>
+        </div>
+        <div class="card-body p-0">
+          {% if enrollment.courses.exists %}
+          <div class="table-responsive">
+            <table class="table mnu-table mb-0">
+              <thead><tr><th>المادة</th><th>الكود</th><th>الساعات</th></tr></thead>
+              <tbody>
+                {% for c in enrollment.courses.all %}
+                <tr><td class="fw-semibold">{{ c.course_name }}</td><td><span class="badge bg-light text-dark font-monospace">{{ c.course_code|default:"-" }}</span></td><td><span class="badge badge-sm badge-unknown">{{ c.credit_hours }} س</span></td></tr>
+                {% endfor %}
+              </tbody>
+              <tfoot><tr class="table-light"><td class="fw-bold" colspan="2">الإجمالي</td><td class="fw-bold">{{ enrollment.registered_hours }} س</td></tr></tfoot>
+            </table>
+          </div>
+          {% else %}<div class="text-center py-4 text-muted small"><i class="bi bi-book d-block fs-2 mb-2 opacity-25"></i>لم تُضَف مواد</div>{% endif %}
+        </div>
+      </div>
+      <!-- Goal & Notes -->
+      {% if enrollment.semester_goal %}
+      <div class="card mb-4">
+        <div class="card-header card-header-navy text-white py-3 px-4 rounded-top-4"><h6 class="mb-0 fw-bold"><i class="bi bi-bullseye me-2" style="color:#C9A84C"></i>هدف الفصل</h6></div>
+        <div class="card-body px-4 py-3"><p class="mb-0" style="line-height:1.8">{{ enrollment.semester_goal }}</p></div>
+      </div>{% endif %}
+      {% if enrollment.advisor_notes and not request.user.is_student %}
+      <div class="card mb-4">
+        <div class="card-header card-header-navy text-white py-3 px-4 rounded-top-4"><h6 class="mb-0 fw-bold"><i class="bi bi-chat-left-text me-2" style="color:#C9A84C"></i>ملاحظات المرشد</h6></div>
+        <div class="card-body px-4 py-3"><p class="mb-0" style="line-height:1.8">{{ enrollment.advisor_notes }}</p></div>
+      </div>{% endif %}
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

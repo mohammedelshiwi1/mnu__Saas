@@ -1,0 +1,104 @@
+{% extends 'base/base.html' %}
+{% block title %}لوحة التحكم - {{ request.user.display_name }}{% endblock %}
+{% block content %}
+<div class="container-fluid px-4">
+  <div class="page-header">
+    <div>
+      <h4 class="page-title"><i class="bi bi-speedometer2"></i>مرحباً، {{ request.user.display_name }}</h4>
+      <p class="text-muted small mb-0">{{ semester }} — طلابك وإرشادهم</p>
+    </div>
+    <a href="{% url 'student_add' %}" class="btn btn-navy rounded-pill px-4"><i class="bi bi-person-plus me-1"></i>إضافة طالب</a>
+  </div>
+
+  {% if danger_students %}
+  <div class="alert border-0 rounded-4 mb-4" style="background:linear-gradient(135deg,#fef2f2,#fff5f5);border-right:4px solid #ef4444!important">
+    <div class="d-flex align-items-start gap-3">
+      <i class="bi bi-exclamation-triangle-fill text-danger fs-4 mt-1"></i>
+      <div class="flex-grow-1">
+        <strong class="text-danger">{{ danger_students|length }} طالب في خطر أكاديمي</strong>
+        <div class="d-flex flex-wrap gap-2 mt-2">
+          {% for enr in danger_students %}
+          <a href="{% url 'student_detail' enr.student.pk %}" class="badge rounded-pill text-decoration-none d-flex align-items-center gap-1 py-2 px-3" style="background:#fee2e2;color:#991b1b">
+            <i class="bi bi-person-fill"></i> {{ enr.student.full_name }} · GPA {{ enr.gpa }}
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="row g-3 mb-4">
+    {% include 'dashboard/_kpi.html' with icon='people-fill' val=stats.total label='طلابي' color='#1B2A5E' bg='rgba(27,42,94,.08)' url='student_list' %}
+    {% include 'dashboard/_kpi.html' with icon='bar-chart-fill' val=stats.avg_gpa label='متوسط GPA' color='#C9A84C' bg='rgba(201,168,76,.12)' url='student_list' %}
+    {% include 'dashboard/_kpi.html' with icon='trophy-fill' val=stats.excellent label='متفوقون' color='#10b981' bg='rgba(16,185,129,.1)' url='student_list' %}
+    {% include 'dashboard/_kpi.html' with icon='check-circle-fill' val=stats.stable label='مستقرون' color='#3b82f6' bg='rgba(59,130,246,.1)' url='student_list' %}
+    {% include 'dashboard/_kpi.html' with icon='exclamation-triangle-fill' val=stats.danger label='في خطر' color='#ef4444' bg='rgba(239,68,68,.1)' url='student_list' %}
+    {% include 'dashboard/_kpi.html' with icon='chat-square-text-fill' val=stats.complaints label='الشكاوى' color='#a855f7' bg='rgba(168,85,247,.1)' url='complaint_list' %}
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-4">
+      <div class="card h-100">
+        <div class="card-header card-header-navy text-white py-3 px-4 rounded-top-4">
+          <h6 class="mb-0 fw-bold"><i class="bi bi-pie-chart-fill me-2" style="color:#C9A84C"></i>توزيع الطلاب</h6>
+        </div>
+        <div class="card-body d-flex flex-column align-items-center justify-content-center">
+          <div style="position:relative;width:170px;height:170px">
+            <canvas id="donutChart"></canvas>
+            <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none">
+              <div class="fw-bold" style="font-size:1.6rem;color:#1B2A5E;line-height:1">{{ stats.total }}</div>
+              <div style="font-size:.68rem;color:#888">طالب</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-header card-header-navy text-white py-3 px-4 d-flex justify-content-between align-items-center rounded-top-4">
+          <h6 class="mb-0 fw-bold"><i class="bi bi-table me-2" style="color:#C9A84C"></i>طلابي</h6>
+          <a href="{% url 'student_add' %}" class="btn btn-sm rounded-pill" style="background:var(--gold);color:#fff"><i class="bi bi-plus me-1"></i>جديد</a>
+        </div>
+        <div class="card-body p-0">
+          {% if enrollments %}
+          <div class="table-responsive">
+            <table class="table mnu-table mb-0">
+              <thead><tr><th>الرقم</th><th>الاسم</th><th>المستوى</th><th>GPA</th><th>الحالة</th><th></th></tr></thead>
+              <tbody>
+                {% for enr in enrollments %}
+                <tr class="{% if enr.gpa and enr.gpa < 2.5 %}tr-danger{% endif %}">
+                  <td><span class="badge bg-light text-dark font-monospace">{{ enr.student.student_id }}</span></td>
+                  <td class="fw-semibold">{{ enr.student.full_name }}</td>
+                  <td><span class="badge badge-sm badge-unknown">{{ enr.student.get_level_display }}</span></td>
+                  <td><span class="fw-bold {% if enr.gpa >= 3.0 %}text-success{% elif enr.gpa >= 2.5 %}text-primary{% else %}text-danger{% endif %}">{{ enr.gpa|default:"-" }}</span></td>
+                  <td>
+                    {% if enr.gpa %}{% if enr.gpa >= 3.0 %}<span class="badge badge-sm badge-excellent">متفوق</span>{% elif enr.gpa >= 2.5 %}<span class="badge badge-sm badge-stable">مستقر</span>{% else %}<span class="badge badge-sm badge-danger">في خطر</span>{% endif %}{% endif %}
+                  </td>
+                  <td>
+                    <div class="d-flex gap-1">
+                      <a href="{% url 'student_detail' enr.student.pk %}" class="btn btn-sm btn-outline-primary rounded-2"><i class="bi bi-eye"></i></a>
+                      <a href="{% url 'chat_list' %}" class="btn btn-sm btn-outline-secondary rounded-2"><i class="bi bi-chat"></i></a>
+                      <a href="{% url 'student_word' enr.student.pk %}" class="btn btn-sm btn-outline-success rounded-2"><i class="bi bi-file-word"></i></a>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="text-center py-5 text-muted"><i class="bi bi-person-x fs-1 d-block mb-3 opacity-25"></i>لا يوجد طلاب مسجلون</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+new Chart(document.getElementById('donutChart'),{type:'doughnut',data:{labels:['متفوقون','مستقرون','في خطر'],datasets:[{data:[{{ stats.excellent }},{{ stats.stable }},{{ stats.danger }}],backgroundColor:['#10b981','#3b82f6','#ef4444'],borderWidth:3,borderColor:'#fff',hoverOffset:5}]},options:{cutout:'72%',responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false},tooltip:{rtl:true,bodyFont:{family:'Cairo'}}}}});
+</script>
+{% endblock %}

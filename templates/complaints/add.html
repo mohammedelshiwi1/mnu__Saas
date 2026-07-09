@@ -1,0 +1,39 @@
+{% extends 'base/base.html' %}
+{% block title %}تسجيل شكوى{% endblock %}
+{% block content %}
+<div class="container px-4" style="max-width:700px">
+  <nav aria-label="breadcrumb" class="mb-3"><ol class="breadcrumb small">
+    <li class="breadcrumb-item"><a href="{% url 'complaint_list' %}" class="text-gold">الشكاوى</a></li>
+    <li class="breadcrumb-item active">شكوى جديدة</li>
+  </ol></nav>
+  <div class="card overflow-hidden">
+    <div class="card-header card-header-navy py-3 px-4"><h5 class="text-white fw-bold mb-0"><i class="bi bi-plus-circle me-2" style="color:#C9A84C"></i>تسجيل شكوى جديدة</h5></div>
+    <div class="card-body p-4">
+      <form method="POST">{% csrf_token %}
+        {% if not request.user.is_student %}
+        <div class="mb-3">
+          <label class="form-label fw-semibold small text-navy">الطالب *</label>
+          {% if students %}
+          <select name="student_id" class="form-select" required>
+            <option value="">-- اختر الطالب --</option>
+            {% for st in students %}<option value="{{ st.student_id }}">{{ st.full_name }} ({{ st.student_id }})</option>{% endfor %}
+          </select>
+          {% else %}
+          <input type="text" name="student_id" class="form-control" placeholder="الرقم الجامعي للطالب" required>
+          {% endif %}
+        </div>
+        {% endif %}
+        <div class="mb-3"><label class="form-label fw-semibold small text-navy">عنوان الشكوى *</label><input type="text" name="title" class="form-control" required placeholder="عنوان مختصر"></div>
+        <div class="mb-3"><label class="form-label fw-semibold small text-navy">وصف المشكلة *</label><textarea name="student_description" class="form-control" rows="4" required placeholder="اشرح المشكلة بالتفصيل"></textarea></div>
+        {% if not request.user.is_student %}
+        <div class="mb-4"><label class="form-label fw-semibold small text-navy">ملاحظات المرشد</label><textarea name="advisor_notes" class="form-control" rows="2" placeholder="ملاحظاتك (اختياري)"></textarea></div>
+        {% endif %}
+        <div class="d-flex gap-3 justify-content-end">
+          <a href="{% url 'complaint_list' %}" class="btn btn-outline-secondary rounded-3 px-4">إلغاء</a>
+          <button type="submit" class="btn btn-navy rounded-3 px-5 fw-bold"><i class="bi bi-check2-circle me-2"></i>تسجيل</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,122 @@
+{% extends 'base/base.html' %}
+{% block title %}{{ complaint.title }}{% endblock %}
+{% block content %}
+<div class="container px-4" style="max-width:800px">
+  <nav aria-label="breadcrumb" class="mb-3"><ol class="breadcrumb small">
+    <li class="breadcrumb-item"><a href="{% url 'complaint_list' %}" class="text-gold">الشكاوى</a></li>
+    <li class="breadcrumb-item active">{{ complaint.title|truncatechars:30 }}</li>
+  </ol></nav>
+
+  <!-- Header -->
+  <div class="card mb-4 overflow-hidden">
+    <div class="p-4" style="background:linear-gradient(135deg,#1B2A5E,#243570)">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+        <div class="text-white">
+          <h5 class="fw-bold mb-2">{{ complaint.title }}</h5>
+          <div class="d-flex flex-wrap gap-3" style="font-size:.83rem;opacity:.82">
+            <span><i class="bi bi-person me-1" style="color:#C9A84C"></i>{{ complaint.student.full_name }}</span>
+            <span><i class="bi bi-hash me-1" style="color:#C9A84C"></i>{{ complaint.student.student_id }}</span>
+            <span><i class="bi bi-calendar me-1" style="color:#C9A84C"></i>{{ complaint.created_at|date:"Y/m/d H:i" }}</span>
+          </div>
+        </div>
+        <span class="badge badge-sm badge-{{ complaint.status }} fs-6">{{ complaint.get_status_display }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Description -->
+  <div class="card mb-4">
+    <div class="card-header card-header-navy text-white py-3 px-4 rounded-top-4"><h6 class="mb-0 fw-bold"><i class="bi bi-chat-left-text me-2" style="color:#C9A84C"></i>وصف المشكلة</h6></div>
+    <div class="card-body px-4 py-3"><p style="line-height:1.9;color:#444">{{ complaint.student_description }}</p></div>
+  </div>
+
+  <!-- Escalation info -->
+  {% if complaint.status == 'escalated' %}
+  <div class="card mb-4" style="border-right:4px solid #a855f7!important">
+    <div class="card-body px-4 py-3">
+      <h6 class="fw-bold mb-2" style="color:#6b21a8"><i class="bi bi-arrow-up-circle-fill me-2"></i>تم التصعيد للإدارة</h6>
+      <p class="mb-1 small"><strong>بواسطة:</strong> {{ complaint.escalated_by.display_name }}</p>
+      <p class="mb-0 small"><strong>السبب:</strong> {{ complaint.escalation_reason }}</p>
+      {% if complaint.escalated_at %}<p class="mb-0 text-muted" style="font-size:.75rem">{{ complaint.escalated_at|date:"Y/m/d H:i" }}</p>{% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Resolution -->
+  {% if complaint.resolution %}
+  <div class="card mb-4" style="border-right:4px solid #10b981!important">
+    <div class="card-header bg-transparent border-0 pt-3 pb-2 px-4"><h6 class="fw-bold mb-0" style="color:#10b981"><i class="bi bi-check2-circle me-2"></i>الحل المتخذ</h6></div>
+    <div class="card-body px-4 pb-3"><p style="line-height:1.9">{{ complaint.resolution }}</p>
+    {% if complaint.closed_at %}<div class="text-muted small"><i class="bi bi-clock me-1"></i>أُغلقت: {{ complaint.closed_at|date:"Y/m/d H:i" }}</div>{% endif %}</div>
+  </div>
+  {% endif %}
+
+  {% if complaint.admin_response %}
+  <div class="card mb-4" style="border-right:4px solid #C9A84C!important">
+    <div class="card-header bg-transparent border-0 pt-3 pb-2 px-4"><h6 class="fw-bold mb-0 text-gold"><i class="bi bi-shield-check me-2"></i>رد الإدارة</h6></div>
+    <div class="card-body px-4 pb-3"><p style="line-height:1.9">{{ complaint.admin_response }}</p></div>
+  </div>
+  {% endif %}
+
+  <!-- Update Forms -->
+  {% if not request.user.is_student and complaint.status != 'closed' %}
+  <div class="card mb-4">
+    <div class="card-header card-header-navy text-white py-3 px-4 rounded-top-4"><h6 class="mb-0 fw-bold"><i class="bi bi-pencil-square me-2" style="color:#C9A84C"></i>تحديث الشكوى</h6></div>
+    <div class="card-body p-4">
+      <form method="POST">{% csrf_token %}
+        <input type="hidden" name="action" value="update">
+        <div class="mb-3">
+          <label class="form-label fw-semibold small text-navy">الحالة</label>
+          <div class="d-flex gap-3 flex-wrap">
+            {% for val,label in complaint.STATUS %}
+            {% if val != 'escalated' %}
+            <div class="form-check"><input class="form-check-input" type="radio" name="status" id="s_{{ val }}" value="{{ val }}" {% if complaint.status == val %}checked{% endif %}><label class="form-check-label" for="s_{{ val }}"><span class="badge badge-sm badge-{{ val }}">{{ label }}</span></label></div>
+            {% endif %}{% endfor %}
+          </div>
+        </div>
+        <div class="mb-3"><label class="form-label fw-semibold small text-navy">ملاحظات المرشد</label><textarea name="advisor_notes" class="form-control" rows="2">{{ complaint.advisor_notes }}</textarea></div>
+        <div class="mb-4"><label class="form-label fw-semibold small text-navy">الحل المتخذ</label><textarea name="resolution" class="form-control" rows="3" placeholder="ما تم فعله لحل المشكلة">{{ complaint.resolution }}</textarea></div>
+        <div class="d-flex gap-3 justify-content-end">
+          <button type="submit" class="btn btn-navy rounded-3 px-5 fw-bold"><i class="bi bi-check2-circle me-2"></i>حفظ</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Escalate button for advisor -->
+  {% if request.user.is_advisor and complaint.status != 'escalated' %}
+  <div class="card mb-4" style="border:2px dashed rgba(168,85,247,.4)">
+    <div class="card-body p-4">
+      <h6 class="fw-bold mb-3" style="color:#6b21a8"><i class="bi bi-arrow-up-circle me-2"></i>تصعيد الشكوى للإدارة</h6>
+      <form method="POST">{% csrf_token %}
+        <input type="hidden" name="action" value="escalate">
+        <div class="mb-3"><label class="form-label fw-semibold small text-navy">سبب التصعيد *</label><textarea name="escalation_reason" class="form-control" rows="2" required placeholder="لماذا تحتاج هذه الشكوى تدخل الإدارة؟"></textarea></div>
+        <button type="submit" class="btn rounded-3 px-4 fw-bold" style="background:#a855f7;color:#fff;border:none"><i class="bi bi-arrow-up-circle-fill me-2"></i>تصعيد للإدارة</button>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Admin response -->
+  {% if request.user.is_admin and complaint.status == 'escalated' %}
+  <div class="card mb-4" style="border:2px solid rgba(201,168,76,.4)">
+    <div class="card-body p-4">
+      <h6 class="fw-bold mb-3 text-gold"><i class="bi bi-shield-check me-2"></i>رد الإدارة</h6>
+      <form method="POST">{% csrf_token %}
+        <input type="hidden" name="action" value="admin_response">
+        <div class="mb-3"><textarea name="admin_response" class="form-control" rows="3" placeholder="رد الإدارة على هذه الشكوى">{{ complaint.admin_response }}</textarea></div>
+        <div class="mb-3">
+          <div class="d-flex gap-3">
+            <div class="form-check"><input class="form-check-input" type="radio" name="status" id="r_progress" value="in_progress" {% if complaint.status != 'closed' %}checked{% endif %}><label class="form-check-label" for="r_progress">استمرار المعالجة</label></div>
+            <div class="form-check"><input class="form-check-input" type="radio" name="status" id="r_closed" value="closed"><label class="form-check-label" for="r_closed">إغلاق</label></div>
+          </div>
+        </div>
+        <div class="mb-3"><textarea name="resolution" class="form-control" rows="2" placeholder="الحل النهائي (عند الإغلاق)"></textarea></div>
+        <button type="submit" class="btn btn-gold rounded-3 px-4 fw-bold"><i class="bi bi-send me-2"></i>إرسال الرد</button>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends 'base/base.html' %}
+{% block title %}تعديل - {{ student.full_name }}{% endblock %}
+{% block content %}
+<div class="container px-4" style="max-width:860px">
+  <nav aria-label="breadcrumb" class="mb-3"><ol class="breadcrumb small">
+    <li class="breadcrumb-item"><a href="{% url 'student_list' %}" class="text-gold">الطلاب</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'student_detail' student.pk %}" class="text-gold">{{ student.full_name }}</a></li>
+    <li class="breadcrumb-item active">تعديل</li>
+  </ol></nav>
+  <div class="card overflow-hidden">
+    <div class="card-header card-header-navy py-3 px-4"><h5 class="text-white fw-bold mb-0"><i class="bi bi-pencil-square me-2" style="color:#C9A84C"></i>تعديل بيانات الطالب</h5></div>
+    <div class="card-body p-4">
+      <form method="POST" enctype="multipart/form-data">{% csrf_token %}
+        <div class="section-divider mb-4"><span>البيانات الشخصية</span></div>
+        <div class="row g-3 mb-4">
+          <div class="col-md-6"><label class="form-label fw-semibold small text-navy">الاسم الكامل</label><input type="text" name="full_name" class="form-control" value="{{ student.full_name }}" required></div>
+          <div class="col-md-6"><label class="form-label fw-semibold small text-navy">الرقم الجامعي</label><input type="text" class="form-control bg-light" value="{{ student.student_id }}" disabled></div>
+          <div class="col-md-4"><label class="form-label fw-semibold small text-navy">الرقم القومي</label><input type="text" name="national_id" class="form-control" value="{{ student.national_id }}"></div>
+          <div class="col-md-4"><label class="form-label fw-semibold small text-navy">السن</label><input type="number" name="age" class="form-control" value="{{ student.age }}"></div>
+          <div class="col-md-4"><label class="form-label fw-semibold small text-navy">المستوى</label>
+            <select name="level" class="form-select">
+              {% for val,label in student.LEVELS %}<option value="{{ val }}" {% if student.level == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6"><label class="form-label fw-semibold small text-navy">الهاتف</label><input type="text" name="phone" class="form-control" value="{{ student.phone }}"></div>
+          <div class="col-md-6"><label class="form-label fw-semibold small text-navy">البريد</label><input type="email" name="email" class="form-control" value="{{ student.email }}"></div>
+        </div>
+        {% if enrollment %}
+        <div class="section-divider mb-4"><span>بيانات الفصل</span></div>
+        <div class="row g-3 mb-4">
+          <div class="col-md-4"><label class="form-label fw-semibold small text-navy">الساعات المنتهية</label><input type="number" name="completed_hours" class="form-control" value="{{ student.completed_hours }}"></div>
+          <div class="col-md-4"><label class="form-label fw-semibold small text-navy">الساعات المسجلة</label><input type="number" name="registered_hours" class="form-control" value="{{ enrollment.registered_hours }}"></div>
+          <div class="col-md-4"><label class="form-label fw-semibold small text-navy">GPA</label><input type="number" name="gpa" class="form-control" value="{{ enrollment.gpa }}" min="0" max="4" step="0.01"></div>
+          <div class="col-12"><label class="form-label fw-semibold small text-navy">هدف الفصل</label><textarea name="semester_goal" class="form-control" rows="2">{{ enrollment.semester_goal }}</textarea></div>
+          <div class="col-12"><label class="form-label fw-semibold small text-navy">ملاحظات المرشد</label><textarea name="advisor_notes" class="form-control" rows="2">{{ enrollment.advisor_notes }}</textarea></div>
+        </div>
+        <div class="section-divider mb-4"><span>المواد المسجلة</span></div>
+        <div id="coursesBox">
+          {% for c in courses %}
+          <div class="course-row row g-2 mb-2">
+            <div class="col-md-5"><input type="text" name="course_name[]" class="form-control" value="{{ c.course_name }}"></div>
+            <div class="col-md-3"><input type="text" name="course_code[]" class="form-control" value="{{ c.course_code }}"></div>
+            <div class="col-md-2"><input type="number" name="course_hours[]" class="form-control" value="{{ c.credit_hours }}"></div>
+            <div class="col-md-2"><button type="button" class="btn btn-outline-danger rounded-3 w-100" onclick="this.closest('.course-row').remove()"><i class="bi bi-trash"></i></button></div>
+          </div>
+          {% empty %}
+          <div class="course-row row g-2 mb-2">
+            <div class="col-md-5"><input type="text" name="course_name[]" class="form-control" placeholder="اسم المادة"></div>
+            <div class="col-md-3"><input type="text" name="course_code[]" class="form-control" placeholder="الكود"></div>
+            <div class="col-md-2"><input type="number" name="course_hours[]" class="form-control" placeholder="الساعات"></div>
+            <div class="col-md-2"></div>
+          </div>
+          {% endfor %}
+        </div>
+        <button type="button" class="btn btn-outline-primary rounded-3 mt-2 mb-4" onclick="addCourse()"><i class="bi bi-plus-circle me-1"></i>إضافة مادة</button>
+        {% endif %}
+        <div class="section-divider mb-4"><span>رفع ملف جديد</span></div>
+        <div class="row g-3 mb-4">
+          <div class="col-md-8"><input type="file" name="new_file" class="form-control"></div>
+          <div class="col-md-4"><input type="text" name="file_description" class="form-control" placeholder="وصف الملف"></div>
+        </div>
+        <hr>
+        <div class="d-flex gap-3 justify-content-end">
+          <a href="{% url 'student_detail' student.pk %}" class="btn btn-outline-secondary rounded-3 px-4">إلغاء</a>
+          <button type="submit" class="btn btn-navy rounded-3 px-5 fw-bold"><i class="bi bi-check2-circle me-2"></i>حفظ</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+function addCourse(){const b=document.getElementById('coursesBox');const r=document.createElement('div');r.className='course-row row g-2 mb-2';r.innerHTML='<div class="col-md-5"><input type="text" name="course_name[]" class="form-control" placeholder="اسم المادة"></div><div class="col-md-3"><input type="text" name="course_code[]" class="form-control" placeholder="الكود"></div><div class="col-md-2"><input type="number" name="course_hours[]" class="form-control" placeholder="الساعات"></div><div class="col-md-2"><button type="button" class="btn btn-outline-danger rounded-3 w-100" onclick="this.closest(\'.course-row\').remove()"><i class="bi bi-trash"></i></button></div>';b.appendChild(r);}
+</script>
+{% endblock %}

@@ -1,0 +1,13 @@
+<div class="col-6 col-md-3 col-lg">
+  <a href="{% url url %}" class="text-decoration-none">
+    <div class="kpi-card card h-100">
+      <div class="card-body text-center py-3 px-2">
+        <div class="kpi-icon mb-2" style="background:{{ bg }}">
+          <i class="bi bi-{{ icon }}" style="color:{{ color }}"></i>
+        </div>
+        <div class="kpi-val" style="color:{{ color }}">{{ val }}</div>
+        <div class="kpi-label">{{ label }}</div>
+      </div>
+    </div>
+  </a>
+</div>

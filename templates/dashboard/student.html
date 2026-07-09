@@ -1,0 +1,100 @@
+{% extends 'base/base.html' %}
+{% block title %}بياناتي - {{ student.full_name }}{% endblock %}
+{% block content %}
+<div class="container px-4" style="max-width:900px">
+  <div class="page-header">
+    <div>
+      <h4 class="page-title"><i class="bi bi-person-circle"></i>مرحباً، {{ student.full_name }}</h4>
+      <p class="text-muted small mb-0">{{ semester }} — بياناتك الأكاديمية</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'chat_list' %}" class="btn btn-navy rounded-pill px-4"><i class="bi bi-chat-dots me-1"></i>راسل مرشدك</a>
+      <a href="{% url 'complaint_add' %}" class="btn btn-outline-warning rounded-pill px-3" style="color:#C9A84C;border-color:#C9A84C"><i class="bi bi-plus me-1"></i>شكوى جديدة</a>
+    </div>
+  </div>
+
+  {% for enr in enrollments %}
+  {% if forloop.first %}
+  <div class="card mb-4 overflow-hidden">
+    <div class="p-4" style="background:linear-gradient(135deg,#1B2A5E,#243570)">
+      <div class="d-flex flex-wrap align-items-center gap-3">
+        <div class="student-ava student-ava-lg">{{ student.full_name|slice:":1" }}</div>
+        <div class="text-white flex-grow-1">
+          <h5 class="fw-bold mb-1">{{ student.full_name }}</h5>
+          <div class="d-flex flex-wrap gap-3" style="font-size:.84rem;opacity:.85">
+            <span><i class="bi bi-hash me-1" style="color:#C9A84C"></i>{{ student.student_id }}</span>
+            <span><i class="bi bi-mortarboard me-1" style="color:#C9A84C"></i>{{ student.get_level_display }}</span>
+            {% if student.advisor %}<span><i class="bi bi-person-badge me-1" style="color:#C9A84C"></i>{{ student.advisor.display_name }}</span>{% endif %}
+          </div>
+        </div>
+        {% if enr.gpa %}
+        <div class="text-center p-3 rounded-3" style="background:rgba(255,255,255,.12)">
+          <div class="fw-bold text-white" style="font-size:1.9rem;line-height:1">{{ enr.gpa }}</div>
+          <div style="font-size:.7rem;color:rgba(255,255,255,.7)">GPA</div>
+          <div class="mt-1">
+            {% if enr.gpa >= 3.0 %}<span class="badge" style="background:#dcfce7;color:#166534;font-size:.65rem">متفوق</span>
+            {% elif enr.gpa >= 2.5 %}<span class="badge" style="background:#dbeafe;color:#1e40af;font-size:.65rem">مستقر</span>
+            {% else %}<span class="badge" style="background:#fee2e2;color:#991b1b;font-size:.65rem">يحتاج دعم</span>{% endif %}
+          </div>
+        </div>
+        {% endif %}
+        <div>
+          {% if enr.data_confirmed %}
+          <div class="text-center p-2 rounded-3" style="background:rgba(16,185,129,.2)">
+            <i class="bi bi-check-circle-fill text-success fs-4"></i>
+            <div style="color:rgba(255,255,255,.8);font-size:.7rem;margin-top:2px">تم الإقرار</div>
+            <div style="color:rgba(255,255,255,.55);font-size:.63rem">{{ enr.data_confirmed_at|date:"Y/m/d" }}</div>
+          </div>
+          {% else %}
+          <a href="{% url 'confirm_data' student.pk %}" class="btn btn-sm rounded-3" style="background:rgba(201,168,76,.25);color:#fff;border:1px solid rgba(201,168,76,.5)">
+            <i class="bi bi-pen me-1"></i>إقرار بصحة البيانات
+          </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="section-divider"><span>البيانات الشخصية</span></div>
+          <div class="d-flex flex-column gap-2">
+            {% for label,val in info_rows %}{% endfor %}
+            <div class="d-flex justify-content-between border-bottom pb-2"><span class="text-muted small">الرقم القومي</span><span class="fw-semibold small font-monospace">{{ student.national_id|default:"-" }}</span></div>
+            <div class="d-flex justify-content-between border-bottom pb-2"><span class="text-muted small">السن</span><span class="fw-semibold small">{{ student.age|default:"-" }}</span></div>
+            <div class="d-flex justify-content-between border-bottom pb-2"><span class="text-muted small">الهاتف</span><span class="fw-semibold small">{{ student.phone|default:"-" }}</span></div>
+            <div class="d-flex justify-content-between"><span class="text-muted small">البريد</span><span class="fw-semibold small">{{ student.email|default:"-" }}</span></div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="section-divider"><span>الفصل الدراسي الحالي</span></div>
+          <div class="d-flex flex-column gap-2">
+            <div class="d-flex justify-content-between border-bottom pb-2"><span class="text-muted small">الساعات المنتهية</span><span class="fw-bold text-navy">{{ student.completed_hours }} س</span></div>
+            <div class="d-flex justify-content-between border-bottom pb-2"><span class="text-muted small">الساعات المسجلة</span><span class="fw-bold text-navy">{{ enr.registered_hours }} س</span></div>
+            <div class="d-flex justify-content-between border-bottom pb-2"><span class="text-muted small">المعدل التراكمي</span><span class="fw-bold {% if enr.gpa >= 3 %}text-success{% elif enr.gpa >= 2.5 %}text-primary{% else %}text-danger{% endif %}">{{ enr.gpa|default:"-" }}</span></div>
+            {% if enr.semester_goal %}<div class="border-bottom pb-2"><span class="text-muted small d-block">هدف الفصل</span><span class="small">{{ enr.semester_goal }}</span></div>{% endif %}
+          </div>
+        </div>
+      </div>
+
+      {% if enr.courses.exists %}
+      <div class="section-divider mt-3"><span>المواد المسجلة</span></div>
+      <div class="table-responsive">
+        <table class="table mnu-table mb-0">
+          <thead><tr><th>المادة</th><th>الكود</th><th>الساعات</th></tr></thead>
+          <tbody>
+            {% for c in enr.courses.all %}
+            <tr><td class="fw-semibold">{{ c.course_name }}</td><td><span class="badge bg-light text-dark font-monospace">{{ c.course_code|default:"-" }}</span></td><td>{{ c.credit_hours }} س</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+  {% empty %}
+  <div class="card p-5 text-center text-muted"><i class="bi bi-inbox fs-1 d-block mb-3 opacity-25"></i>لا توجد بيانات للفصل الحالي</div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends 'base/base.html' %}
+{% block title %}الشكاوى{% endblock %}
+{% block content %}
+<div class="container-fluid px-4">
+  <div class="page-header">
+    <h4 class="page-title"><i class="bi bi-exclamation-triangle"></i>الشكاوى</h4>
+    <a href="{% url 'complaint_add' %}" class="btn btn-navy rounded-pill px-4"><i class="bi bi-plus me-1"></i>شكوى جديدة</a>
+  </div>
+
+  <!-- Status KPIs -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3"><a href="?status=pending" class="text-decoration-none"><div class="kpi-card card h-100"><div class="card-body text-center py-3"><div class="kpi-icon mb-2 mx-auto" style="background:rgba(245,158,11,.1)"><i class="bi bi-hourglass-split" style="color:#f59e0b"></i></div><div class="kpi-val" style="color:#f59e0b">{{ pending }}</div><div class="kpi-label">معلقة</div></div></div></a></div>
+    <div class="col-6 col-md-3"><a href="?status=in_progress" class="text-decoration-none"><div class="kpi-card card h-100"><div class="card-body text-center py-3"><div class="kpi-icon mb-2 mx-auto" style="background:rgba(59,130,246,.1)"><i class="bi bi-arrow-repeat" style="color:#3b82f6"></i></div><div class="kpi-val" style="color:#3b82f6">{{ in_progress }}</div><div class="kpi-label">جاري العمل</div></div></div></a></div>
+    <div class="col-6 col-md-3"><a href="?status=escalated" class="text-decoration-none"><div class="kpi-card card h-100"><div class="card-body text-center py-3"><div class="kpi-icon mb-2 mx-auto" style="background:rgba(168,85,247,.1)"><i class="bi bi-arrow-up-circle" style="color:#a855f7"></i></div><div class="kpi-val" style="color:#a855f7">{{ escalated }}</div><div class="kpi-label">مُصعَّدة</div></div></div></a></div>
+    <div class="col-6 col-md-3"><a href="?status=closed" class="text-decoration-none"><div class="kpi-card card h-100"><div class="card-body text-center py-3"><div class="kpi-icon mb-2 mx-auto" style="background:rgba(16,185,129,.1)"><i class="bi bi-check2-circle" style="color:#10b981"></i></div><div class="kpi-val" style="color:#10b981">{{ closed }}</div><div class="kpi-label">مغلقة</div></div></div></a></div>
+  </div>
+
+  <!-- Filter tabs -->
+  <div class="d-flex gap-2 mb-3 flex-wrap">
+    <a href="?" class="btn btn-sm rounded-pill {% if not status_filter %}btn-navy{% else %}btn-outline-secondary{% endif %}">الكل</a>
+    <a href="?status=pending"     class="btn btn-sm rounded-pill {% if status_filter == 'pending' %}btn-warning text-white{% else %}btn-outline-warning{% endif %}">معلقة</a>
+    <a href="?status=in_progress" class="btn btn-sm rounded-pill {% if status_filter == 'in_progress' %}btn-primary{% else %}btn-outline-primary{% endif %}">جاري العمل</a>
+    <a href="?status=escalated"   class="btn btn-sm rounded-pill {% if status_filter == 'escalated' %}btn-purple text-white{% else %}btn-outline-secondary{% endif %}" style="{% if status_filter == 'escalated' %}background:#a855f7;color:#fff{% endif %}">مُصعَّدة</a>
+    <a href="?status=closed"      class="btn btn-sm rounded-pill {% if status_filter == 'closed' %}btn-success{% else %}btn-outline-success{% endif %}">مغلقة</a>
+  </div>
+
+  {% if complaints %}
+  <div class="row g-3">
+    {% for comp in complaints %}
+    <div class="col-12 col-lg-6">
+      <a href="{% url 'complaint_detail' comp.pk %}" class="text-decoration-none">
+        <div class="card h-100" style="transition:all .3s;cursor:pointer" onmouseenter="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(27,42,94,.14)'" onmouseleave="this.style.transform='';this.style.boxShadow=''">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <h6 class="fw-bold mb-1 text-navy">{{ comp.title }}</h6>
+                <div class="text-muted small"><i class="bi bi-person me-1"></i>{{ comp.student.full_name }} · <span class="font-monospace">{{ comp.student.student_id }}</span></div>
+              </div>
+              <span class="badge badge-sm badge-{{ comp.status }} flex-shrink-0">
+                {% if comp.status == 'pending' %}<i class="bi bi-hourglass-split me-1"></i>معلقة
+                {% elif comp.status == 'in_progress' %}<i class="bi bi-arrow-repeat me-1"></i>جاري
+                {% elif comp.status == 'escalated' %}<i class="bi bi-arrow-up-circle me-1"></i>مُصعَّدة
+                {% else %}<i class="bi bi-check2-circle me-1"></i>مغلقة{% endif %}
+              </span>
+            </div>
+            <p class="text-muted small mb-2 line-clamp-2">{{ comp.student_description|truncatechars:120 }}</p>
+            {% if comp.status == 'escalated' %}
+            <div class="rounded-3 p-2 mt-2" style="background:rgba(168,85,247,.08);font-size:.78rem;color:#6b21a8"><i class="bi bi-arrow-up-circle-fill me-1"></i>{{ comp.escalation_reason|truncatechars:80 }}</div>
+            {% endif %}
+            <div class="text-muted mt-2" style="font-size:.72rem"><i class="bi bi-clock me-1"></i>{{ comp.created_at|date:"Y/m/d - H:i" }}</div>
+          </div>
+        </div>
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="card p-5 text-center text-muted">
+    <i class="bi bi-chat-square-text fs-1 d-block mb-3 opacity-25"></i>
+    <p>لا توجد شكاوى{% if status_filter %} في هذه الحالة{% endif %}</p>
+    <a href="{% url 'complaint_add' %}" class="btn btn-navy rounded-pill px-4 mx-auto" style="width:fit-content"><i class="bi bi-plus me-1"></i>تسجيل شكوى</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

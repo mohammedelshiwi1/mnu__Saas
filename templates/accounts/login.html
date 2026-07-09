@@ -1,0 +1,69 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>تسجيل الدخول - MNU</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{font-family:'Cairo',sans-serif;box-sizing:border-box}
+body{background:linear-gradient(135deg,#0f1c3f 0%,#1B2A5E 60%,#0f1c3f 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;direction:rtl}
+.card{background:rgba(255,255,255,.97);border:0;border-radius:22px;box-shadow:0 30px 80px rgba(0,0,0,.4),0 0 0 1px rgba(201,168,76,.25);max-width:420px;width:100%;overflow:hidden}
+.card-top{background:linear-gradient(135deg,#1B2A5E,#243570);padding:2.5rem 2rem 2rem;text-align:center;position:relative}
+.card-top::after{content:'';position:absolute;bottom:0;left:0;right:0;height:4px;background:linear-gradient(90deg,transparent,#C9A84C,transparent)}
+.logo-ring{width:108px;height:108px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;padding:5px;box-shadow:0 8px 24px rgba(0,0,0,.3),0 0 0 3px rgba(201,168,76,.5)}
+.logo-ring img{width:100%;height:100%;border-radius:50%;object-fit:cover}
+.form-control{border:1.5px solid #e0e5f0;border-radius:11px;padding:.75rem 1rem;font-family:'Cairo',sans-serif}
+.form-control:focus{border-color:#1B2A5E;box-shadow:0 0 0 3px rgba(27,42,94,.12)}
+.input-group-text{border:1.5px solid #e0e5f0;background:#f8f9fc;color:#1B2A5E}
+.btn-login{background:linear-gradient(135deg,#1B2A5E,#243570);color:#fff;border:0;border-radius:11px;padding:.85rem;font-family:'Cairo',sans-serif;font-weight:700;font-size:1rem;width:100%;transition:all .3s}
+.btn-login:hover{color:#fff;transform:translateY(-2px);box-shadow:0 8px 24px rgba(27,42,94,.35)}
+.particle{position:fixed;border-radius:50%;background:rgba(201,168,76,.35);animation:float 8s infinite;pointer-events:none}
+@keyframes float{0%,100%{transform:translateY(0) rotate(0deg);opacity:.4}50%{transform:translateY(-70px) rotate(180deg);opacity:.8}}
+</style>
+</head>
+<body>
+<div class="particle" style="width:8px;height:8px;left:15%;top:70%;animation-delay:0s"></div>
+<div class="particle" style="width:12px;height:12px;left:80%;top:25%;animation-delay:2.5s;animation-duration:10s"></div>
+<div class="particle" style="width:5px;height:5px;left:55%;top:85%;animation-delay:4s;animation-duration:6s"></div>
+<div class="particle" style="width:9px;height:9px;left:35%;top:15%;animation-delay:1s;animation-duration:9s"></div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="logo-ring"><img src="{% static 'images/logo.jpg' %}" alt="MNU"></div>
+    <h5 class="text-white fw-bold mb-1" style="font-size:1.05rem">نظام الإرشاد الأكاديمي</h5>
+    <p class="mb-0" style="color:rgba(255,255,255,.6);font-size:.8rem">كلية الهندسة · جامعة المنصورة الأهلية</p>
+  </div>
+  <div class="p-4">
+    <h6 class="fw-bold text-center mb-4" style="color:#1B2A5E"><i class="bi bi-shield-lock me-2" style="color:#C9A84C"></i>تسجيل الدخول</h6>
+    {% if messages %}{% for m in messages %}<div class="alert alert-danger py-2 small rounded-3 mb-3"><i class="bi bi-x-circle me-1"></i>{{ m }}</div>{% endfor %}{% endif %}
+    <form method="POST">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.GET.next }}">
+      <div class="mb-3">
+        <label class="form-label fw-semibold small" style="color:#1B2A5E">اسم المستخدم</label>
+        <div class="input-group">
+          <span class="input-group-text rounded-end-3 border-start-0"><i class="bi bi-person-fill"></i></span>
+          <input type="text" name="username" class="form-control rounded-start-0" placeholder="أدخل اسم المستخدم" required autofocus>
+        </div>
+      </div>
+      <div class="mb-4">
+        <label class="form-label fw-semibold small" style="color:#1B2A5E">كلمة المرور</label>
+        <div class="input-group">
+          <span class="input-group-text rounded-end-3 border-start-0"><i class="bi bi-lock-fill"></i></span>
+          <input type="password" name="password" id="pw" class="form-control" placeholder="أدخل كلمة المرور" required>
+          <button type="button" class="btn btn-outline-secondary rounded-start-3" onclick="const f=document.getElementById('pw');const i=this.querySelector('i');if(f.type=='password'){f.type='text';i.className='bi bi-eye-slash'}else{f.type='password';i.className='bi bi-eye'}">
+            <i class="bi bi-eye"></i>
+          </button>
+        </div>
+      </div>
+      <button type="submit" class="btn-login"><i class="bi bi-box-arrow-in-right me-2"></i>دخول</button>
+    </form>
+    <p class="text-center text-muted mt-3 mb-0" style="font-size:.75rem">للدخول الأول: تواصل مع مدير النظام للحصول على بياناتك</p>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
