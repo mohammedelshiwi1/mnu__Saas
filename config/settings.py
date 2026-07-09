@@ -3,8 +3,8 @@ import os, dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'mnu-dev-secret-key-change-in-production-2025')
-DEBUG = os.environ.get('DEBUG', 'True') == 'True'
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost 127.0.0.1').split()
+DEBUG = False
+ALLOWED_HOSTS = "mnusaas-production.up.railway.app"
 
 INSTALLED_APPS = [
     'django.contrib.admin',
